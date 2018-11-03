@@ -188,6 +188,25 @@ update_test(const char *dst_path,
 
 	return  src_time > dst_time;
 
+#elif (defined __MACH__)
+	struct stat dst_st;
+	int r = stat(dst_path, &dst_st);
+	if (r == -1) {
+		return true;
+	}
+
+	struct stat src_st;
+	stat(src_path, &src_st);
+
+	if (src_st.st_mtimespec.tv_sec > dst_st.st_mtimespec.tv_sec) {
+		return true;
+	}
+
+	if (src_st.st_mtimespec.tv_nsec > dst_st.st_mtimespec.tv_nsec) {
+		return true;
+	}
+
+	return false;
 #else
 	struct stat dst_st;
 	int r = stat(dst_path, &dst_st);
